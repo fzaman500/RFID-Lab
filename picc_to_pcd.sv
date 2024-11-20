@@ -49,7 +49,7 @@ always_ff @(posedge clk_in) begin
     end
     else if (state == STARTING) begin //start bit is 1
       fourth_frame_count <= fourth_frame_count + 1;
-      if (fourth_frame_count) begin
+      if (fourth_frame_count == 3) begin
         if (real_data[curr_index] == 0) begin
           state <= SENDING_0;
         end else begin
