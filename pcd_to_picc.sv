@@ -39,7 +39,7 @@ always_ff @(posedge clk_in) begin
     if (state == IDLE) begin
       transmit_done <= 0;
       if (is_transmit) begin
-        state <= SENDING_1; //end bit is 0
+        state <= STARTING; //end bit is 0
         real_data <= data;
         max_index <= 8 * num_bytes - 1;
         curr_index <= 0;
