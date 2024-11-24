@@ -21,6 +21,7 @@ logic [39:0] curr_index;
 logic prev_num;
 logic parity_bit;
 logic [39:0] max_index;
+logic is_short_frame_real;
 
 typedef enum  {IDLE, STARTING, ENDING, SENDING_PARITY, SENDING_1, SENDING_0} state;
 
@@ -46,6 +47,7 @@ always_ff @(posedge clk_in) begin
         prev_num <= 0;
         amp_out <= 0;
         parity_bit <= 0;
+        is_short_frame_real <= is_short_frame;
       end
     end
     else if (state == STARTING) begin //start bit is 0
@@ -116,7 +118,7 @@ always_ff @(posedge clk_in) begin
         end
       end
     end else if (state == SENDING_PARITY) begin //sending parity bit logic and next steps
-        if (is_short_frame) begin
+        if (is_short_frame_real) begin
             state <= ENDING;
         end else
             fourth_frame_count <= fourth_frame_count + 1;
@@ -174,7 +176,7 @@ always_ff @(posedge clk_in) begin
 
     end
   end
-end
+
 
 
 endmodule
