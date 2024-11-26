@@ -17,7 +17,7 @@ module rfid
 
   logic [15:0] sine_out;
 
-  assign amp_out = picc_amp_out * sine_out; // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
+  assign amp_out = $signed($signed(picc_amp_out) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
 
   picc_to_pcd picc
     (
