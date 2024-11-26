@@ -4,7 +4,7 @@
 module sine_generator #
 (
   parameter integer STEP_FREQ = 100_000_000, //Hz
-  parameter integer FREQUENCY = 10_000_000, //Hz
+  parameter integer FREQUENCY = 13_560_000, //Hz
   parameter integer PHASE = 90 //degrees
 )
 (
@@ -110,4 +110,5 @@ module sine_lut(input wire [5:0] phase_in, input wire clk_in, input wire rst_in,
    end
   end
 endmodule
+
 `default_nettype wire

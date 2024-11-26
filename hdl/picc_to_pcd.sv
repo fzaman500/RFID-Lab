@@ -3,7 +3,7 @@
 module picc_to_pcd 
   (
     input wire sys_clk, // (main clock is 135.6 MHz)
-    input wire clk_in, //pass in 3.39MHz (13.56 MHz/4) 
+    input wire clk_in, // pass in 0.026484 MHz ( 13.56 MHz/(4*128) ) 
     input wire rst_in, //clock and reset
     input logic [39:0] data_in, // I believe I transmit LSB first
     input logic [2:0] num_bytes_in,
