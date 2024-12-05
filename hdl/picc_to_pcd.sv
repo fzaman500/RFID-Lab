@@ -9,6 +9,7 @@ module picc_to_pcd
     input logic [2:0] num_bytes_in,
     input wire trigger_in,
     output logic busy_out,
+    output logic done_out,
     output logic signed [31:0] amp_out
   );
 
@@ -31,10 +32,12 @@ module picc_to_pcd
       prev_num <= 0;
       curr_index <= 0;
       parity_bit <= 0;
+      done_out <= 0;
     end else begin
       case (state)
         IDLE: begin
           busy_out <= 0;
+          done_out <= 0;
           if (trigger_in) begin
             state <= STARTING; //end bit is 0
             real_data <= data_in;
@@ -146,6 +149,7 @@ module picc_to_pcd
             if (curr_index == max_index) begin //end it
               fourth_frame_count <= fourth_frame_count + 1;
               state <= ENDING;
+              done_out <= 1;
             end else begin // go to next num
               curr_index <= curr_index + 1;
               fourth_frame_count <= 0;
@@ -159,7 +163,8 @@ module picc_to_pcd
         end
         ENDING: begin //cease after last parity_bit bit
           state <= IDLE;
-          busy_out <= 0;
+          busy_out <= 0; 
+          done_out <= 0;
         end
       endcase
     end

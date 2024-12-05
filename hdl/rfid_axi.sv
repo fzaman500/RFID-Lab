@@ -50,6 +50,7 @@ module rfid #
   logic [15:0] sine_out;
 
   assign amp_out = $signed($signed(picc_amp_out) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
+  logic done_out;
 
   picc_to_pcd picc
     (
@@ -60,7 +61,8 @@ module rfid #
       .num_bytes_in(picc_num_bytes_in),
       .trigger_in(picc_trigger_in),
       .busy_out(picc_busy_out),
-      .amp_out(picc_amp_out)
+      .amp_out(picc_amp_out),
+      .done_out(done_out)
     );
   
   sine_generator sine_gen
@@ -96,7 +98,7 @@ module rfid #
       //or downstream consumer/slave do we update.
       if (s00_axis_tready & busy_out)begin
         m00_axis_tvalid_reg <= s00_axis_tvalid;
-        m00_axis_tlast_reg <= s00_axis_tlast;
+        m00_axis_tlast_reg <= done_out;
         m00_axis_tdata_reg <=picc_amp_out;
         m00_axis_tstrb_reg <= s00_axis_tstrb;
       end
