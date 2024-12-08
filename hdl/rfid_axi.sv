@@ -21,11 +21,29 @@ module rfid #
     output logic [(C_M00_AXIS_TDATA_WIDTH/8)-1: 0] m00_axis_tstrb,
 
     input wire clk_in, // (main clock is 135.6 MHz)
-    input wire clk_in_picc, // pass in 0.026484 MHz ( 13.56 MHz/(128*4) )
+    input wire clk_in_13_56, // 13.56 MHz
     input wire rst_in, // clock and reset 
     input wire btn_in,
     output logic signed [31:0] amp_out
   );
+
+  logic clk13_56_div_128;
+
+  clk_div128 div128
+    (
+        .clk_in(clk_in_13_56),
+        .rst_in(rst_in),
+        .clk_out(clk13_56_div_128)
+    );
+
+  logic clk_in_picc;
+
+  clk_div4 div4 
+    (
+        .clk_in(clk13_56_div_128),
+        .rst_in(rst_in),
+        .clk_out(clk_in_picc)
+    );
 
   logic m00_axis_tvalid_reg, m00_axis_tlast_reg;
   logic [C_M00_AXIS_TDATA_WIDTH-1 : 0] m00_axis_tdata_reg;
