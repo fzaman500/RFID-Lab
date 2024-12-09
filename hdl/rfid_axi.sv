@@ -2,16 +2,9 @@
 //PICC to PCD
 module rfid_axi #
   (
-    parameter integer C_S00_AXIS_TDATA_WIDTH	= 32,
     parameter integer C_M00_AXIS_TDATA_WIDTH	= 32
   )
   (
-    // Ports of Axi Slave Bus Interface S00_AXIS
-    input wire  s00_axis_aclk, s00_axis_aresetn,
-    input wire  s00_axis_tlast, s00_axis_tvalid,
-    input wire [C_S00_AXIS_TDATA_WIDTH-1 : 0] s00_axis_tdata,
-    input wire [(C_S00_AXIS_TDATA_WIDTH/8)-1: 0] s00_axis_tstrb,
-    output logic  s00_axis_tready,
 
     // Ports of Axi Master Bus Interface M00_AXIS
     input wire  m00_axis_aclk, m00_axis_aresetn, // (main clock is 135.6 MHz)
@@ -20,9 +13,9 @@ module rfid_axi #
     output logic [C_M00_AXIS_TDATA_WIDTH-1 : 0] m00_axis_tdata,
     output logic [(C_M00_AXIS_TDATA_WIDTH/8)-1: 0] m00_axis_tstrb,
 
-    input wire clk_in_13_56, // pass in 0.026484 MHz ( 13.56 MHz/(128*4) )
+    input wire clk_in_13_56 // pass in 0.026484 MHz ( 13.56 MHz/(128*4) )
     //input wire btn_in,
-    output logic signed [31:0] amp_out
+    
   );
   
   logic clk13_56_div_128;
@@ -55,9 +48,9 @@ module rfid_axi #
   assign m00_axis_tstrb = m00_axis_tstrb_reg;
   //change...only if there is a slot for new data to go into:
   //this should avoid deadlock.
-  assign s00_axis_tready = m00_axis_tready || ~m00_axis_tvalid;
+  //assign s00_axis_tready = m00_axis_tready || ~m00_axis_tvalid;
 
-  assign rst_in = s00_axis_aresetn == 0;
+  assign rst_in = m00_axis_aresetn == 0;
 
   logic [39:0] picc_data_in;
   logic [2:0] picc_num_bytes_in;
@@ -65,12 +58,12 @@ module rfid_axi #
   logic picc_busy_out;
   logic picc_amp_out;
 
-  logic [15:0] sine_out;
-
-  assign amp_out = $signed($signed(picc_amp_out) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
+  logic signed [15:0] sine_out;
+  logic signed [31:0] amp_out;
+  assign amp_out = $signed($signed(16'h7FFF) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
   logic done_out;
 
-  picc_to_pcd picc
+  /*picc_to_pcd picc
     (
       .sys_clk(clk_in),
       .clk_in(clk_in_picc),
@@ -81,7 +74,7 @@ module rfid_axi #
       .busy_out(picc_busy_out),
       .amp_out(picc_amp_out),
       .done_out(done_out)
-    );
+    );*/
   
   sine_generator sine_gen
     (
@@ -105,8 +98,8 @@ module rfid_axi #
     end
   end
 
-  always_ff @(posedge s00_axis_aclk) begin
-    if (s00_axis_aresetn==0)begin
+  always_ff @(posedge m00_axis_aclk) begin
+    if (m00_axis_aresetn==0)begin
       m00_axis_tvalid_reg <= 0;
       m00_axis_tlast_reg <= 0;
       m00_axis_tdata_reg <= 0;
@@ -114,11 +107,11 @@ module rfid_axi #
     end else begin
       //only if there is room in either our registers...
       //or downstream consumer/slave do we update.
-      if (s00_axis_tready & picc_busy_out) begin
-        m00_axis_tvalid_reg <= s00_axis_tvalid;
-        m00_axis_tlast_reg <= done_out;
-        m00_axis_tdata_reg <=picc_amp_out;
-        m00_axis_tstrb_reg <= s00_axis_tstrb;
+      if (m00_axis_tready) begin//& picc_busy_out) begin
+        m00_axis_tvalid_reg <= 1;
+        m00_axis_tlast_reg <= 1;
+        m00_axis_tdata_reg <= amp_out;
+        m00_axis_tstrb_reg <= 16'hFFFF;
       end
     end
   end
