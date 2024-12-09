@@ -60,10 +60,10 @@ module rfid_axi #
 
   logic signed [15:0] sine_out;
   logic signed [31:0] amp_out;
-  assign amp_out = $signed($signed(16'h7FFF) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
+  assign amp_out = $signed($signed(picc_amp_out) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
   logic done_out;
 
-  /*picc_to_pcd picc
+  picc_to_pcd picc
     (
       .sys_clk(clk_in),
       .clk_in(clk_in_picc),
@@ -74,7 +74,7 @@ module rfid_axi #
       .busy_out(picc_busy_out),
       .amp_out(picc_amp_out),
       .done_out(done_out)
-    );*/
+    );
   
   sine_generator sine_gen
     (
