@@ -3,7 +3,7 @@
 //Sine Wave Generator
 module sine_generator #
 (
-  parameter integer STEP_FREQ = 100_000_000, //Hz
+  parameter integer STEP_FREQ = 147_465_000, //Hz
   parameter integer FREQUENCY = 13_560_000, //Hz
   parameter integer PHASE = 90 //degrees
 )
