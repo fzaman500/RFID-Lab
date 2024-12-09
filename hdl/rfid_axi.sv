@@ -1,6 +1,6 @@
 
 //PICC to PCD
-module rfid #
+module rfid_axi #
   (
     parameter integer C_S00_AXIS_TDATA_WIDTH	= 32,
     parameter integer C_M00_AXIS_TDATA_WIDTH	= 32
@@ -14,20 +14,20 @@ module rfid #
     output logic  s00_axis_tready,
 
     // Ports of Axi Master Bus Interface M00_AXIS
-    input wire  m00_axis_aclk, m00_axis_aresetn,
+    input wire  m00_axis_aclk, m00_axis_aresetn, // (main clock is 135.6 MHz)
     input wire  m00_axis_tready,
     output logic  m00_axis_tvalid, m00_axis_tlast,
     output logic [C_M00_AXIS_TDATA_WIDTH-1 : 0] m00_axis_tdata,
     output logic [(C_M00_AXIS_TDATA_WIDTH/8)-1: 0] m00_axis_tstrb,
 
-    input wire clk_in, // (main clock is 135.6 MHz)
-    input wire clk_in_13_56, // 13.56 MHz
-    input wire rst_in, // clock and reset 
-    input wire btn_in,
+    input wire clk_in_13_56, // pass in 0.026484 MHz ( 13.56 MHz/(128*4) )
+    //input wire btn_in,
     output logic signed [31:0] amp_out
   );
-
+  
   logic clk13_56_div_128;
+  
+  assign clk_in = m00_axis_aclk;
 
   clk_div128 div128
     (
@@ -57,7 +57,7 @@ module rfid #
   //this should avoid deadlock.
   assign s00_axis_tready = m00_axis_tready || ~m00_axis_tvalid;
 
-  rst_in = s00_axis_aresetn == 0;
+  assign rst_in = s00_axis_aresetn == 0;
 
   logic [39:0] picc_data_in;
   logic [2:0] picc_num_bytes_in;
@@ -95,7 +95,7 @@ module rfid #
     if (rst_in) begin
       picc_trigger_in <= 0;
     end else begin
-      if (btn_in) begin
+      if (1'b1) begin
         picc_data_in <= 32'h24_90_67_35;
         picc_num_bytes_in <= 4;
         picc_trigger_in <= 1;
@@ -105,7 +105,7 @@ module rfid #
     end
   end
 
-  always_ff @(posedge s00_axis_aclk)begin
+  always_ff @(posedge s00_axis_aclk) begin
     if (s00_axis_aresetn==0)begin
       m00_axis_tvalid_reg <= 0;
       m00_axis_tlast_reg <= 0;
@@ -114,7 +114,7 @@ module rfid #
     end else begin
       //only if there is room in either our registers...
       //or downstream consumer/slave do we update.
-      if (s00_axis_tready & busy_out)begin
+      if (s00_axis_tready & picc_busy_out) begin
         m00_axis_tvalid_reg <= s00_axis_tvalid;
         m00_axis_tlast_reg <= done_out;
         m00_axis_tdata_reg <=picc_amp_out;
