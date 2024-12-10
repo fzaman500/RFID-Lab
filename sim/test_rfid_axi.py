@@ -7,6 +7,7 @@ from pathlib import Path
 from cocotb.triggers import Timer, ClockCycles, RisingEdge, FallingEdge, ReadOnly,with_timeout, First, Join
 from cocotb.utils import get_sim_time as gst
 from cocotb.runner import get_runner
+from cocotb.clock import Clock
 
 import numpy as np
 
@@ -27,19 +28,44 @@ async def generate_clock_13_56(clock_wire):
         count += 1
 
         if count == count_max/2:
-             clock_wire.value = 0
+            clock_wire.value = 0
         if count == count_max:
             clock_wire.value = 1
             count = 0
 
         await Timer(5,units="ns")
 
+async def clock_147_465_mhz_test(clock_wire):
+    # Clock period in nanoseconds
+    clock_period_ps = 6784  # 1/147.465 MHz in ns
+    while True:
+        clock_wire.value = 0
+        await Timer(clock_period_ps,units="ps")
+        clock_wire.value = 1
+        await Timer(clock_period_ps,units="ps")
+
+async def clock_13_56_mhz_test(clock_wire):
+    # Clock period in nanoseconds
+    clock_period_ps = 73746  # 1/13.56 MHz in ns
+
+    # Clock period in nanoseconds
+    clock_period_ps = 6784  # 1/147.465 MHz in ns
+    while True:
+        clock_wire.value = 0
+        await Timer(clock_period_ps,units="ps")
+        clock_wire.value = 1
+        await Timer(clock_period_ps,units="ps")
+
+
+
 @cocotb.test()
 async def first_test(dut):
     """First cocotb test?"""
-    await cocotb.start( generate_clock( dut.m00_axis_aclk ) )
-    await cocotb.start( generate_clock( dut.clk_in_13_56 ) )
+    #await cocotb.start( generate_clock( dut.m00_axis_aclk ) )
+   #await cocotb.start( generate_clock( dut.clk_in_13_56 ) )
     # await cocotb.start( generate_clock_13_56( dut.clk_in_13_56 ) )
+    await cocotb.start(clock_147_465_mhz_test(dut.m00_axis_aclk))
+    await cocotb.start(clock_13_56_mhz_test(dut.clk_in_13_56))
     
     await reset(dut, dut.rst_in)
 
@@ -87,8 +113,7 @@ def rfid_axi_runner():
     sim = os.getenv("SIM", "icarus")
     proj_path = Path(__file__).resolve().parent.parent
     sys.path.append(str(proj_path / "sim" / "model"))
-    sources = [proj_path / "hdl" / "rfid_axi.sv", proj_path / "hdl" / "picc_to_pcd.sv", proj_path / "hdl" / "sine_generator.sv", \
-               proj_path / "hdl" / "clean_wave.sv", proj_path / "hdl" / "clk_div128.sv", proj_path / "hdl" / "clk_div4.sv"] #grow/modify this as needed.
+    sources = [proj_path / "hdl" / "rfid_axi.sv", proj_path / "hdl" / "picc_to_pcd.sv", proj_path / "hdl" / "sine_generator.sv", proj_path / "hdl" / "clk_div128.sv", proj_path / "hdl" / "clk_div4.sv"] #grow/modify this as needed.
     build_test_args = ["-Wall"]#,"COCOTB_RESOLVE_X=ZEROS"]
     parameters = {}
     sys.path.append(str(proj_path / "sim"))
