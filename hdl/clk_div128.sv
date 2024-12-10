@@ -13,7 +13,8 @@ always_ff @(posedge clk_in) begin
     end else begin
       if (count == 63) begin
          count <= 0;
-         clk_out <= !clk_out;
+         if (clk_out == 0) clk_out <= 1;
+         else clk_out <= 0;
       end else begin
         count <= count + 1;
       end

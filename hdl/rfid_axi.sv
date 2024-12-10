@@ -52,7 +52,7 @@ module rfid_axi #
   //this should avoid deadlock.
   //assign s00_axis_tready = m00_axis_tready || ~m00_axis_tvalid;
 
-  assign rst_in = m00_axis_aresetn == 0;
+  assign rst_in = (m00_axis_aresetn == 0);
 
   logic [39:0] picc_data_in;
   logic [2:0] picc_num_bytes_in;
@@ -62,7 +62,7 @@ module rfid_axi #
 
   logic signed [15:0] sine_out;
   logic signed [31:0] amp_out;
-  assign amp_out = $signed($signed(1) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
+  assign amp_out = $signed($signed(picc_amp_out) * sine_out); // FIX THIS, should amp_amt be larger? sine goes into negatives, right?
   logic done_out;
 
   picc_to_pcd picc

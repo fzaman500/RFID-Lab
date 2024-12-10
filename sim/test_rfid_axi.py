@@ -99,7 +99,7 @@ async def drive_data_in(dut):
 
 async def reset(dut, rst_wire):
     rst_wire.value = 1
-    await ClockCycles(dut.m00_axis_aclk,1)
+    await ClockCycles(dut.m00_axis_aclk,10)
     rst_wire.value = 0
 
 
