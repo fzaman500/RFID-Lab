@@ -14,7 +14,8 @@ module sine_generator #
   output logic signed [15:0] amp_out); //output phase in 2's complement
   
   localparam CLKS_PER_CYCLE = STEP_FREQ/FREQUENCY; //ok to be non integer
-  localparam PHASE_INCR = int'(32'hFFFF_FFFF/CLKS_PER_CYCLE);
+  localparam PHASE_INCR = int'(64'hFFFF_FFFF*FREQUENCY/STEP_FREQ);//this times freq
+  //localparam PHASE_INCR = int'(32'hFFFF_FFFF/CLKS_PER_CYCLE);
   localparam PHASE_OFFSET = int'(1.0*PHASE/360*32'hFFFF_FFFF);
   //parameter PHASE_INCR = 32'b1000_0000_0000_0000_0000_0000_0000_0000>>3; //1/16th of 12 khz is 750 Hz
   logic [31:0] phase;
