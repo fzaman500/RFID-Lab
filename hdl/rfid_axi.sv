@@ -86,6 +86,30 @@ module rfid_axi #
       .amp_out(sine_out)
     );
 
+  logic clean_out;
+
+  clean_wave clean_wave_inst
+    (
+      .clk_in(clk_in),
+      .rst_in(rst_in),
+      .data_in(amp_out),
+      .period_trigger_in(clk_in_picc),
+      .bit_out(clean_out)
+    );
+
+  logic pcd_input_data;
+  logic pcd_input_valid;
+
+  pcd_in pcd_input
+    (
+      .sys_clk(clk_in),
+      .clk_in(clk13_56_div_128),
+      .rst_in(rst_in),
+      .data_in(clean_out),
+      .data_out(pcd_input_data),
+      .valid_out(pcd_input_valid)
+    );
+
   always_ff @(posedge clk_in) begin
     if (rst_in) begin
       picc_trigger_in <= 0;
@@ -93,6 +117,8 @@ module rfid_axi #
       if (1'b1) begin
         picc_data_in <= 32'h24_90_67_35;
         picc_num_bytes_in <= 4;
+        // picc_data_in <= 8'hFF;
+        // picc_num_bytes_in <= 1;
         picc_trigger_in <= 1;
       end else begin
         picc_trigger_in <= 0;

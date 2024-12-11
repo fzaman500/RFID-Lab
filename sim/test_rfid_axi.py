@@ -113,7 +113,7 @@ def rfid_axi_runner():
     sim = os.getenv("SIM", "icarus")
     proj_path = Path(__file__).resolve().parent.parent
     sys.path.append(str(proj_path / "sim" / "model"))
-    sources = [proj_path / "hdl" / "rfid_axi.sv", proj_path / "hdl" / "picc_to_pcd.sv", proj_path / "hdl" / "sine_generator.sv", proj_path / "hdl" / "clk_div128.sv", proj_path / "hdl" / "clk_div4.sv"] #grow/modify this as needed.
+    sources = [proj_path / "hdl" / "rfid_axi.sv", proj_path / "hdl" / "picc_to_pcd.sv", proj_path / "hdl" / "sine_generator.sv", proj_path / "hdl" / "clk_div128.sv", proj_path / "hdl" / "clk_div4.sv", proj_path / "hdl" / "clean_wave.sv", proj_path / "hdl" / "pcd_in.sv"] #grow/modify this as needed.
     build_test_args = ["-Wall"]#,"COCOTB_RESOLVE_X=ZEROS"]
     parameters = {}
     sys.path.append(str(proj_path / "sim"))
